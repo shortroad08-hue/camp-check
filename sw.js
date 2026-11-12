@@ -1,6 +1,6 @@
 // 앱 화면을 휴대폰에 저장해 두는 파일이에요.
 // 인터넷이 되면 항상 새 버전을 먼저 가져오고, 안 되면 저장된 화면을 보여 줘요.
-const CACHE = 'my-app-camp-v7';
+const CACHE = 'my-app-camp-v8';
 const FILES = [
   './',
   './index.html',
