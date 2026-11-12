@@ -1,6 +1,6 @@
 // 앱 화면을 휴대폰에 저장해 두는 파일이에요.
 // 인터넷이 되면 항상 새 버전을 먼저 가져오고, 안 되면 저장된 화면을 보여 줘요.
-const CACHE = 'my-app-camp-v6';
+const CACHE = 'my-app-camp-v7';
 const FILES = [
   './',
   './index.html',
@@ -27,7 +27,8 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
-    fetch(req)
+    // cache: 'no-cache' = 브라우저가 기억해 둔 옛 파일 대신, 매번 GitHub에 새 버전이 있는지 확인한다
+    fetch(req, { cache: 'no-cache' })
       .then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(req, copy));
