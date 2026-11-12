@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>캠핑 예약 확인</title>
+<meta name="theme-color" content="#2f6b4f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="캠핑예약">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root{
+  --bg:#f6f3ec; --card:#ffffff; --text:#1f2a24; --sub:#5d6b63; --line:#e3ddd0;
+  --main:#2f6b4f; --main-press:#24553e; --main-text:#ffffff; --soft:#e7efe9;
+  --yes:#1d7a45; --yes-bg:#e1f3e8;
+  --no:#6b706d;  --no-bg:#ecebe8;
+  --done:#a85f12; --done-bg:#fbeedb;
+  --danger:#b3261e;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#151a17; --card:#1f2622; --text:#eef2ef; --sub:#a9b5ae; --line:#323b36;
+    --main:#5fae86; --main-press:#4e9673; --main-text:#0f1712; --soft:#25332b;
+    --yes:#7fd6a2; --yes-bg:#1f3a2a;
+    --no:#b3b8b5;  --no-bg:#2d3330;
+    --done:#f2b46a; --done-bg:#3d2e1b;
+    --danger:#ff8a80;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  font-size:18px; line-height:1.5;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+header{
+  position:sticky; top:0; z-index:5; background:var(--bg);
+  padding:16px 16px 10px; display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid var(--line);
+}
+header h1{font-size:24px; margin:0; flex:1}
+.back{
+  border:0; background:var(--soft); color:var(--text); font-size:18px; font-weight:700;
+  border-radius:12px; min-height:48px; padding:0 16px; cursor:pointer;
+}
+main{padding:16px; max-width:640px; margin:0 auto; padding-bottom:120px}
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:16px; margin-bottom:14px;
+}
+.card-top{display:flex; align-items:flex-start; gap:10px}
+.card-top h2{font-size:21px; margin:0; flex:1; word-break:break-all}
+.card-top button.name{
+  all:unset; cursor:pointer; flex:1; font-size:21px; font-weight:700; word-break:break-all;
+}
+.badge{
+  flex:none; font-size:15px; font-weight:700; padding:4px 10px; border-radius:999px; white-space:nowrap;
+}
+.badge.yes{color:var(--yes); background:var(--yes-bg)}
+.badge.no{color:var(--no); background:var(--no-bg)}
+.badge.done{color:var(--done); background:var(--done-bg)}
+.badge.none{color:var(--sub); background:var(--soft)}
+.row{margin:8px 0 0; color:var(--sub); font-size:17px}
+.row b{color:var(--text); font-weight:600}
+.past{color:var(--danger); font-weight:700; font-size:15px; margin-left:4px}
+.btn{
+  display:flex; align-items:center; justify-content:center; width:100%;
+  min-height:54px; border-radius:14px; border:0; font-size:18px; font-weight:700;
+  text-decoration:none; cursor:pointer; padding:0 14px; font-family:inherit;
+}
+.btn.main{background:var(--main); color:var(--main-text)}
+.btn.main:active{background:var(--main-press)}
+.btn.line{background:transparent; color:var(--text); border:2px solid var(--line)}
+.btn.danger{background:transparent; color:var(--danger); border:2px solid var(--line)}
+.btn[aria-disabled="true"]{opacity:.45; pointer-events:none}
+.mt{margin-top:12px}
+.rec-label{font-size:15px; color:var(--sub); margin:14px 0 6px}
+.rec{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.rec.three{grid-template-columns:1fr 1fr 1fr}
+.rec button{
+  min-height:52px; border-radius:14px; font-size:17px; font-weight:700; cursor:pointer;
+  font-family:inherit; border:2px solid transparent;
+}
+.rec .yes{color:var(--yes); background:var(--yes-bg)}
+.rec .no{color:var(--no); background:var(--no-bg)}
+.rec .done{color:var(--done); background:var(--done-bg)}
+.empty{text-align:center; color:var(--sub); padding:48px 12px}
+.empty b{display:block; font-size:21px; color:var(--text); margin-bottom:8px}
+.add-bar{
+  position:fixed; left:0; right:0; bottom:0; padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top, var(--bg) 70%, transparent);
+}
+.add-bar .btn{max-width:608px; margin:0 auto; min-height:60px; font-size:20px; box-shadow:0 4px 14px rgba(0,0,0,.15)}
+label{display:block; font-weight:700; margin:18px 0 6px}
+label small{font-weight:400; color:var(--sub); font-size:15px}
+.search .hint{margin-top:10px}
+.checked .site{margin-top:16px; padding-top:14px; border-top:1px solid var(--line)}
+.site-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+.site-head h3{margin:0}
+.site-head a{color:var(--main); font-weight:700; font-size:16px; text-decoration:none}
+.kind{color:var(--sub); font-size:14px; font-weight:400}
+.warnbox{font-size:15px; color:var(--done); background:var(--done-bg); border-radius:12px; padding:10px 12px; margin:10px 0 0}
+select{
+  width:100%; font-size:18px; font-family:inherit; color:var(--text); background:var(--card);
+  border:2px solid var(--line); border-radius:12px; padding:12px; min-height:52px;
+}
+input,textarea{
+  width:100%; font-size:18px; font-family:inherit; color:var(--text); background:var(--card);
+  border:2px solid var(--line); border-radius:12px; padding:12px; min-height:52px;
+}
+input:focus,textarea:focus{outline:none; border-color:var(--main)}
+textarea{min-height:96px; resize:vertical}
+.dates{display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+.chips button{
+  border:2px solid var(--line); background:var(--soft); color:var(--text); border-radius:999px;
+  font-size:16px; padding:8px 14px; cursor:pointer; font-family:inherit; min-height:44px;
+}
+.hint{font-size:15px; color:var(--sub); margin:6px 0 0}
+.history{list-style:none; padding:0; margin:0}
+.history li{
+  display:flex; align-items:center; gap:10px; padding:12px 0; border-top:1px solid var(--line);
+}
+.history li:first-child{border-top:0}
+.history .when{flex:1; font-size:17px}
+.history .del{
+  border:0; background:transparent; color:var(--sub); font-size:15px; text-decoration:underline;
+  cursor:pointer; min-height:44px; padding:0 6px; font-family:inherit;
+}
+.memo{white-space:pre-wrap; margin:8px 0 0}
+h3{font-size:19px; margin:0 0 8px}
+.toast{
+  position:fixed; left:50%; bottom:100px; transform:translateX(-50%);
+  background:var(--text); color:var(--bg); padding:12px 20px; border-radius:999px;
+  font-weight:700; opacity:0; transition:opacity .2s; pointer-events:none; z-index:20; white-space:nowrap;
+}
+.toast.show{opacity:1}
+.notice{font-size:15px; color:var(--sub); background:var(--soft); border-radius:14px; padding:12px 14px; margin-bottom:14px}
+</style>
+</head>
+<body>
+<header>
+  <button class="back" id="back" hidden>← 뒤로</button>
+  <h1 id="title">캠핑 예약 확인</h1>
+</header>
+<main id="app"></main>
+<div class="add-bar" id="addBar" hidden><a class="btn main" href="#/new">+ 캠핑장 추가</a></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var KEY = 'my-app-camps';
+  var RESULTS = {
+    yes:  {label:'자리 있음', cls:'yes'},
+    no:   {label:'자리 없음', cls:'no'},
+    done: {label:'예약 완료', cls:'done'}
+  };
+  var SITES = [
+    {name:'국립공원', url:'https://reservation.knps.or.kr'},
+    {name:'숲나들e (자연휴양림)', url:'https://www.foresttrip.go.kr'},
+    {name:'땡큐캠핑', url:'https://www.thankqcamping.com'},
+    {name:'캠핏', url:'https://camfit.co.kr'}
+  ];
+  var DAYS = ['일','월','화','수','목','금','토'];
+
+  var app = document.getElementById('app');
+  var titleEl = document.getElementById('title');
+  var backBtn = document.getElementById('back');
+  var addBar = document.getElementById('addBar');
+
+  // ---------- 저장 ----------
+  function load(){
+    try{
+      var v = JSON.parse(localStorage.getItem(KEY));
+      return Array.isArray(v) ? v : [];
+    }catch(e){ return []; }
+  }
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify(camps)); }
+    catch(e){ toast('저장하지 못했어요'); }
+  }
+  var camps = load();
+
+  // ---------- 도우미 ----------
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function find(id){ for(var i=0;i<camps.length;i++){ if(camps[i].id===id) return camps[i]; } return null; }
+  function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function fmtDate(s){
+    if(!s) return '';
+    var p = s.split('-'); var d = new Date(+p[0], +p[1]-1, +p[2]);
+    return (d.getMonth()+1) + '월 ' + d.getDate() + '일(' + DAYS[d.getDay()] + ')';
+  }
+  function fmtRange(c){
+    if(c.dateFrom && c.dateTo && c.dateTo !== c.dateFrom) return fmtDate(c.dateFrom) + ' ~ ' + fmtDate(c.dateTo);
+    return fmtDate(c.dateFrom || c.dateTo);
+  }
+  function isPast(c){
+    var end = c.dateTo || c.dateFrom;
+    return !!end && end < todayStr();
+  }
+  function fmtTime(iso){
+    var d = new Date(iso), now = new Date();
+    var h = d.getHours(), m = String(d.getMinutes()).padStart(2,'0');
+    var t = (h < 12 ? '오전 ' : '오후 ') + (h % 12 === 0 ? 12 : h % 12) + ':' + m;
+    var y = new Date(now); y.setDate(now.getDate()-1);
+    if(d.toDateString() === now.toDateString()) return '오늘 ' + t;
+    if(d.toDateString() === y.toDateString()) return '어제 ' + t;
+    return (d.getMonth()+1) + '월 ' + d.getDate() + '일 ' + t;
+  }
+  function lastCheck(c){ return c.checks && c.checks.length ? c.checks[c.checks.length-1] : null; }
+  function badge(c){
+    var l = lastCheck(c);
+    if(!l) return '<span class="badge none">확인 전</span>';
+    var r = RESULTS[l.r];
+    return '<span class="badge ' + r.cls + '">' + r.label + '</span>';
+  }
+  function normUrl(u){
+    u = (u || '').trim();
+    if(!u) return '';
+    if(!/^https?:\/\//i.test(u)) u = 'https://' + u;
+    return u;
+  }
+  function siteBtn(c){
+    if(!c.url) return '<span class="btn line mt" aria-disabled="true">예약 사이트 주소가 없어요</span>';
+    return '<a class="btn main mt" href="' + esc(c.url) + '" target="_blank" rel="noopener">예약 사이트 열기</a>';
+  }
+  function recButtons(c, withDone){
+    return '<p class="rec-label">확인한 결과를 눌러 기록해요</p>' +
+      '<div class="rec' + (withDone ? ' three' : '') + '">' +
+      '<button class="yes" data-rec="yes" data-id="' + c.id + '">자리 있음</button>' +
+      '<button class="no" data-rec="no" data-id="' + c.id + '">자리 없음</button>' +
+      (withDone ? '<button class="done" data-rec="done" data-id="' + c.id + '">예약 완료</button>' : '') +
+      '</div>';
+  }
+  var toastTimer;
+  function toast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 1800);
+  }
+  function setHeader(title, showBack){
+    titleEl.textContent = title;
+    backBtn.hidden = !showBack;
+    document.title = title === '캠핑 예약 확인' ? title : title + ' · 캠핑 예약 확인';
+  }
+
+  // ---------- 날짜 · 지역으로 빈자리 찾기 ----------
+  var SKEY = 'my-app-search';
+  var REGIONS = ['강원','경기','서울','인천','충북','충남','전북','전남','경북','경남','제주'];
+  function addDays(s, n){
+    var p = s.split('-'); var d = new Date(+p[0], +p[1]-1, +p[2] + n);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function loadSearch(){
+    var s = null;
+    try{ s = JSON.parse(localStorage.getItem(SKEY)); }catch(e){}
+    if(!s || !s.from || s.from < todayStr()){ var f = addDays(todayStr(), 7); s = {from:f, to:addDays(f, 1), region:(s && s.region) || '강원', open:false}; }
+    return s;
+  }
+  var search = loadSearch();
+  function saveSearch(){ try{ localStorage.setItem(SKEY, JSON.stringify(search)); }catch(e){} }
+  function kstMs(s){ var p = s.split('-'); return Date.UTC(+p[0], +p[1]-1, +p[2]) - 9*3600*1000; }
+  function tqUrl(){
+    return 'https://m.thankqcamping.com/resv/list.hbb?site_tp=&res_dt=' + search.from.replace(/-/g,'') +
+      '&res_edt=' + search.to.replace(/-/g,'') + '&region=' + encodeURIComponent(search.region) +
+      '&sub_region=&ser_adult_count=0&ser_child_count=0&ser_keyword=';
+  }
+  function cfUrl(){
+    return 'https://camfit.co.kr/search/result?cityAndMajors=' + encodeURIComponent(search.region + '-') +
+      '&startTimestamp=' + kstMs(search.from) + '&endTimestamp=' + kstMs(search.to) + '&adultCnt=2&isOnlyAvailable=true';
+  }
+  function searchPanel(){
+    var nights = Math.round((kstMs(search.to) - kstMs(search.from)) / 86400000);
+    var summary = fmtDate(search.from) + ' ~ ' + fmtDate(search.to) + ' · ' + nights + '박 · ' + search.region;
+    if(!search.open){
+      return '<section class="card search">' +
+        '<button class="btn main" id="sOpen">날짜 · 지역 고르기</button>' +
+        '<p class="row" style="text-align:center">' + esc(summary) + '</p></section>';
+    }
+    return '<section class="card search">' +
+      '<h3>날짜로 빈자리 찾기</h3>' +
+      '<div class="dates"><input id="sFrom" type="date" value="' + search.from + '" aria-label="들어가는 날">' +
+      '<span>~</span><input id="sTo" type="date" value="' + search.to + '" aria-label="나오는 날"></div>' +
+      '<label for="sRegion" style="margin-top:12px">지역</label>' +
+      '<select id="sRegion">' + REGIONS.map(function(r){ return '<option' + (r === search.region ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select>' +
+      '<p class="row">' + esc(summary) + '</p>' +
+      '<a class="btn main mt" href="' + esc(tqUrl()) + '" target="_blank" rel="noopener">땡큐캠핑 빈자리 보기</a>' +
+      '<a class="btn main mt" href="' + esc(cfUrl()) + '" target="_blank" rel="noopener">캠핏 빈자리 보기</a>' +
+      '<div class="rec mt"><a class="btn line" href="https://www.foresttrip.go.kr" target="_blank" rel="noopener">숲나들e</a>' +
+      '<a class="btn line" href="https://reservation.knps.or.kr" target="_blank" rel="noopener">국립공원</a></div>' +
+      '<p class="hint">땡큐캠핑 · 캠핏은 예약 가능한 곳만 걸러서 열려요. 숲나들e · 국립공원은 사이트에서 날짜를 다시 골라 주세요.</p>' +
+      '<button class="btn line mt" id="sClose">접기</button></section>';
+  }
+  function bindSearch(){
+    var o = document.getElementById('sOpen');
+    if(o) o.onclick = function(){ search.open = true; saveSearch(); renderList(); };
+    var c = document.getElementById('sClose');
+    if(c) c.onclick = function(){ search.open = false; saveSearch(); renderList(); };
+    var f = document.getElementById('sFrom'), t = document.getElementById('sTo'), r = document.getElementById('sRegion');
+    if(!f) return;
+    function change(){
+      search.from = f.value || search.from;
+      search.to = t.value || search.to;
+      if(search.to <= search.from) search.to = addDays(search.from, 1);
+      search.region = r.value;
+      saveSearch(); renderList();
+    }
+    f.onchange = change; t.onchange = change; r.onchange = change;
+  }
+
+  // ---------- Claude가 확인한 결과 (results.json) ----------
+  var checked = null;
+  function loadChecked(){
+    if(!window.fetch) return;
+    fetch('results.json', {cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if(!d || !d.from) return;
+        checked = d;
+        // 내가 아직 날짜를 고른 적이 없으면, Claude가 확인한 날짜로 맞춰 둔다
+        var saved = null; try{ saved = localStorage.getItem(SKEY); }catch(e){}
+        if(!saved && d.from >= todayStr()){ search.from = d.from; search.to = d.to; search.region = d.region; }
+        route();
+      }).catch(function(){});
+  }
+  function checkedPanel(){
+    if(!checked) return '';
+    var c = checked;
+    var head = fmtDate(c.from) + ' ~ ' + fmtDate(c.to) + ' · ' + c.region;
+    var differs = c.from !== search.from || c.to !== search.to || c.region !== search.region;
+    function site(title, s, url){
+      if(!s) return '';
+      var body;
+      if(s.status === 'ok' && s.items && s.items.length){
+        body = '<ul class="history">' + s.items.map(function(it){
+          return '<li><span class="when">' + esc(it.name) + (it.kind ? ' <small class="kind">' + esc(it.kind) + '</small>' : '') +
+            '<br><small class="kind">' + esc(it.area || '') + '</small></span>' +
+            '<span class="badge yes">' + (it.left != null ? esc(it.left) + '자리' : '자리 있음') + '</span></li>';
+        }).join('') + '</ul>';
+      }else if(s.status === 'ok'){
+        body = '<p class="row">예약 가능한 곳이 없었어요.</p>';
+      }else{
+        body = '<p class="row"><span class="badge none">확인 못 함</span></p>';
+      }
+      return '<div class="site"><div class="site-head"><h3>' + title + '</h3>' +
+        '<a href="' + url + '" target="_blank" rel="noopener">사이트 열기 ›</a></div>' + body +
+        (s.note ? '<p class="hint">' + esc(s.note) + '</p>' : '') + '</div>';
+    }
+    return '<section class="card checked">' +
+      '<h3>Claude가 확인한 빈자리</h3>' +
+      '<p class="row"><b>' + esc(head) + '</b></p>' +
+      '<p class="hint" style="margin-top:2px">' + esc(c.checkedLabel || '') + ' 기준이에요. 자리는 계속 바뀌니 예약 전에 사이트에서 한 번 더 봐 주세요.</p>' +
+      (differs ? '<p class="warnbox">지금 고른 날짜 · 지역과 달라요. 새로 확인하려면 컴퓨터에서 Claude에게 부탁해 주세요.</p>' : '') +
+      site('숲나들e', c.foresttrip, 'https://www.foresttrip.go.kr') +
+      site('국립공원', c.knps, 'https://reservation.knps.or.kr') +
+      '</section>';
+  }
+
+  // ---------- 화면: 목록 ----------
+  function renderList(){
+    setHeader('캠핑 예약 확인', false);
+    addBar.hidden = false;
+    if(!camps.length){
+      app.innerHTML = searchPanel() + checkedPanel() + '<div class="empty"><b>아직 등록한 캠핑장이 없어요</b>' +
+        '아래 <b style="display:inline;font-size:inherit">+ 캠핑장 추가</b> 버튼을 눌러<br>가고 싶은 캠핑장을 넣어 주세요.</div>';
+      bindSearch();
+      return;
+    }
+    var html = searchPanel() + checkedPanel();
+    camps.forEach(function(c){
+      var l = lastCheck(c);
+      html += '<article class="card">' +
+        '<div class="card-top"><button class="name" data-open="' + c.id + '">' + esc(c.name) + ' ›</button>' + badge(c) + '</div>' +
+        (fmtRange(c) ? '<p class="row">날짜 <b>' + esc(fmtRange(c)) + '</b>' + (isPast(c) ? '<span class="past">지난 날짜</span>' : '') + '</p>' : '') +
+        (c.openRule ? '<p class="row">예약 열림 <b>' + esc(c.openRule) + '</b></p>' : '') +
+        '<p class="row">마지막 확인 <b>' + (l ? esc(fmtTime(l.t)) : '아직 없음') + '</b></p>' +
+        siteBtn(c) + recButtons(c, false) +
+        '</article>';
+    });
+    app.innerHTML = html;
+    bindSearch();
+  }
+
+  // ---------- 화면: 상세 ----------
+  function renderDetail(id){
+    var c = find(id);
+    if(!c){ location.hash = '#/'; return; }
+    setHeader(c.name, true);
+    addBar.hidden = true;
+    var hist = (c.checks || []).slice().reverse();
+    var histHtml = hist.length ? '<ul class="history">' + hist.map(function(h){
+      var r = RESULTS[h.r];
+      return '<li><span class="badge ' + r.cls + '">' + r.label + '</span>' +
+        '<span class="when">' + esc(fmtTime(h.t)) + '</span>' +
+        '<button class="del" data-delcheck="' + esc(h.t) + '">지우기</button></li>';
+    }).join('') + '</ul>' : '<p class="row">아직 확인 기록이 없어요.</p>';
+
+    app.innerHTML =
+      '<section class="card">' +
+        '<div class="card-top"><h2>' + esc(c.name) + '</h2>' + badge(c) + '</div>' +
+        (fmtRange(c) ? '<p class="row">날짜 <b>' + esc(fmtRange(c)) + '</b>' + (isPast(c) ? '<span class="past">지난 날짜</span>' : '') + '</p>' : '') +
+        (c.openRule ? '<p class="row">예약 열림 <b>' + esc(c.openRule) + '</b></p>' : '') +
+        (c.memo ? '<p class="memo">' + esc(c.memo) + '</p>' : '') +
+        siteBtn(c) + recButtons(c, true) +
+      '</section>' +
+      '<section class="card"><h3>확인 기록</h3>' + histHtml + '</section>' +
+      '<a class="btn line" href="#/edit/' + c.id + '">정보 수정</a>' +
+      '<button class="btn danger mt" data-delcamp="' + c.id + '">이 캠핑장 삭제</button>';
+
+    app.querySelectorAll('[data-delcheck]').forEach(function(b){
+      b.onclick = function(){
+        if(!confirm('이 기록을 지울까요?')) return;
+        c.checks = c.checks.filter(function(h){ return h.t !== b.dataset.delcheck; });
+        save(); renderDetail(id); toast('기록을 지웠어요');
+      };
+    });
+    app.querySelector('[data-delcamp]').onclick = function(){
+      if(!confirm('"' + c.name + '"을(를) 삭제할까요?\n확인 기록도 함께 지워져요.')) return;
+      camps = camps.filter(function(x){ return x.id !== id; });
+      save(); location.hash = '#/'; toast('삭제했어요');
+    };
+  }
+
+  // ---------- 화면: 추가 · 수정 ----------
+  function renderForm(id){
+    var c = id ? find(id) : null;
+    if(id && !c){ location.hash = '#/'; return; }
+    setHeader(c ? '정보 수정' : '캠핑장 추가', true);
+    addBar.hidden = true;
+    c = c || {};
+    app.innerHTML =
+      '<form id="f" novalidate>' +
+      '<label for="name">캠핑장 이름 <small>(꼭 적어 주세요)</small></label>' +
+      '<input id="name" value="' + esc(c.name) + '" placeholder="예: 덕유대 야영장" autocomplete="off">' +
+      '<label for="url">예약 사이트 주소</label>' +
+      '<input id="url" type="url" inputmode="url" value="' + esc(c.url) + '" placeholder="https://..." autocomplete="off">' +
+      '<p class="hint">아래 버튼을 누르면 주소가 바로 들어가요</p>' +
+      '<div class="chips">' + SITES.map(function(s, i){ return '<button type="button" data-site="' + i + '">' + esc(s.name) + '</button>'; }).join('') + '</div>' +
+      '<label>가고 싶은 날짜</label>' +
+      '<div class="dates"><input id="from" type="date" value="' + esc(c.dateFrom) + '" aria-label="시작 날짜">' +
+      '<span>~</span><input id="to" type="date" value="' + esc(c.dateTo) + '" aria-label="끝 날짜"></div>' +
+      '<label for="open">예약 열리는 때</label>' +
+      '<input id="open" value="' + esc(c.openRule) + '" placeholder="예: 매월 1일 오전 10시" autocomplete="off">' +
+      '<label for="memo">메모</label>' +
+      '<textarea id="memo" placeholder="예: A구역 데크가 좋음, 전기 사용 가능">' + esc(c.memo) + '</textarea>' +
+      '<button class="btn main mt" type="submit" style="margin-top:24px">' + (id ? '저장하기' : '추가하기') + '</button>' +
+      '</form>';
+
+    app.querySelectorAll('[data-site]').forEach(function(b){
+      b.onclick = function(){ document.getElementById('url').value = SITES[+b.dataset.site].url; };
+    });
+    document.getElementById('f').onsubmit = function(e){
+      e.preventDefault();
+      var name = document.getElementById('name').value.trim();
+      if(!name){ toast('캠핑장 이름을 적어 주세요'); document.getElementById('name').focus(); return; }
+      var from = document.getElementById('from').value, to = document.getElementById('to').value;
+      if(from && to && to < from){ var t = from; from = to; to = t; }
+      var data = {
+        name: name,
+        url: normUrl(document.getElementById('url').value),
+        dateFrom: from, dateTo: to,
+        openRule: document.getElementById('open').value.trim(),
+        memo: document.getElementById('memo').value.trim()
+      };
+      if(id){
+        Object.assign(find(id), data);
+        save(); location.hash = '#/camp/' + id; toast('저장했어요');
+      }else{
+        data.id = newId(); data.checks = [];
+        camps.push(data);
+        save(); location.hash = '#/'; toast('추가했어요');
+      }
+    };
+  }
+
+  // ---------- 기록 버튼 (목록 · 상세 공통) ----------
+  app.addEventListener('click', function(e){
+    var b = e.target.closest('[data-rec]');
+    if(b){
+      var c = find(b.dataset.id); if(!c) return;
+      c.checks = c.checks || [];
+      c.checks.push({t: new Date().toISOString(), r: b.dataset.rec});
+      if(c.checks.length > 200) c.checks = c.checks.slice(-200);
+      save(); route(); toast('"' + RESULTS[b.dataset.rec].label + '"(으)로 기록했어요');
+      return;
+    }
+    var o = e.target.closest('[data-open]');
+    if(o){ location.hash = '#/camp/' + o.dataset.open; }
+  });
+
+  backBtn.onclick = function(){
+    if(history.length > 1) history.back(); else location.hash = '#/';
+  };
+
+  // ---------- 화면 고르기 ----------
+  function route(){
+    var h = location.hash.replace(/^#/, '') || '/';
+    var m;
+    if(h === '/new') renderForm(null);
+    else if((m = h.match(/^\/edit\/(.+)$/))) renderForm(m[1]);
+    else if((m = h.match(/^\/camp\/(.+)$/))) renderDetail(m[1]);
+    else renderList();
+  }
+  window.addEventListener('hashchange', function(){ route(); window.scrollTo(0, 0); });
+  route();
+  loadChecked();
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
+})();
+</script>
+</body>
+</html>
