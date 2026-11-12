@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>캠핑 예약 확인</title>
-<meta name="theme-color" content="#2f6b4f">
+<meta name="theme-color" content="#1688b8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -13,46 +16,54 @@
 <meta name="apple-mobile-web-app-title" content="캠핑예약">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
+/* 디자인: 맑은 계곡 (CLAUDE.md 4번) */
 :root{
-  --bg:#f6f3ec; --card:#ffffff; --text:#1f2a24; --sub:#5d6b63; --line:#e3ddd0;
-  --main:#2f6b4f; --main-press:#24553e; --main-text:#ffffff; --soft:#e7efe9;
-  --yes:#1d7a45; --yes-bg:#e1f3e8;
-  --no:#6b706d;  --no-bg:#ecebe8;
-  --done:#a85f12; --done-bg:#fbeedb;
-  --danger:#b3261e;
+  --bg:#eaf6fb; --card:#ffffff; --text:#12324a; --sub:#4f6b80; --line:#d3e6f0;
+  --main:#1688b8; --main-press:#0f6f97; --main-text:#ffffff; --soft:#dceff7;
+  --top:#1688b8; --top-text:#ffffff; --top-sub:#d6f0fb; --shadow:rgba(22,136,184,.12);
+  --yes:#0b7a68; --yes-bg:#d5f3ec;
+  --no:#6a7c88;  --no-bg:#e7eef2;
+  --done:#b0620f; --done-bg:#fdeed9;
+  --danger:#c0352b;
+  --r:24px;
+  --head:"Jua","Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body-font:"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#151a17; --card:#1f2622; --text:#eef2ef; --sub:#a9b5ae; --line:#323b36;
-    --main:#5fae86; --main-press:#4e9673; --main-text:#0f1712; --soft:#25332b;
-    --yes:#7fd6a2; --yes-bg:#1f3a2a;
-    --no:#b3b8b5;  --no-bg:#2d3330;
-    --done:#f2b46a; --done-bg:#3d2e1b;
+    --bg:#0e1d27; --card:#16293a; --text:#e6f3fa; --sub:#9fb8c8; --line:#25405a;
+    --main:#4fb8e6; --main-press:#3aa3d1; --main-text:#08202e; --soft:#1b3448;
+    --top:#0f4a68; --top-text:#ffffff; --top-sub:#bfe4f5; --shadow:rgba(0,0,0,.25);
+    --yes:#6fe0c8; --yes-bg:#123a35;
+    --no:#a9b9c4;  --no-bg:#203345;
+    --done:#f5b867; --done-bg:#3b2b18;
     --danger:#ff8a80;
+    color-scheme:dark;
   }
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{
   margin:0; background:var(--bg); color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  font-family:var(--body-font);
   font-size:18px; line-height:1.5;
-  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  padding:0 0 env(safe-area-inset-bottom);
 }
 header{
-  position:sticky; top:0; z-index:5; background:var(--bg);
-  padding:16px 16px 10px; display:flex; align-items:center; gap:10px;
-  border-bottom:1px solid var(--line);
+  position:sticky; top:0; z-index:5; background:var(--top); color:var(--top-text);
+  padding:calc(18px + env(safe-area-inset-top)) 18px 16px; display:flex; align-items:center; gap:10px;
+  border-radius:0 0 var(--r) var(--r); box-shadow:0 4px 14px var(--shadow);
 }
-header h1{font-size:24px; margin:0; flex:1}
+header h1{font-family:var(--head); font-weight:400; font-size:27px; margin:0; flex:1; color:var(--top-text)}
 .back{
-  border:0; background:var(--soft); color:var(--text); font-size:18px; font-weight:700;
-  border-radius:12px; min-height:48px; padding:0 16px; cursor:pointer;
+  border:0; background:rgba(255,255,255,.18); color:var(--top-text); font-size:18px; font-weight:700;
+  border-radius:999px; min-height:48px; padding:0 18px; cursor:pointer; font-family:inherit;
 }
+h2,h3,.card-top button.name{font-family:var(--head); font-weight:400}
 main{padding:16px; max-width:640px; margin:0 auto; padding-bottom:120px}
 .card{
-  background:var(--card); border:1px solid var(--line); border-radius:18px;
-  padding:16px; margin-bottom:14px;
+  background:var(--card); border:0; border-radius:var(--r);
+  padding:18px; margin-bottom:14px; box-shadow:0 4px 14px var(--shadow);
 }
 .card-top{display:flex; align-items:flex-start; gap:10px}
 .card-top h2{font-size:21px; margin:0; flex:1; word-break:break-all}
@@ -71,7 +82,7 @@ main{padding:16px; max-width:640px; margin:0 auto; padding-bottom:120px}
 .past{color:var(--danger); font-weight:700; font-size:15px; margin-left:4px}
 .btn{
   display:flex; align-items:center; justify-content:center; width:100%;
-  min-height:54px; border-radius:14px; border:0; font-size:18px; font-weight:700;
+  min-height:54px; border-radius:20px; border:0; font-size:18px; font-weight:700;
   text-decoration:none; cursor:pointer; padding:0 14px; font-family:inherit;
 }
 .btn.main{background:var(--main); color:var(--main-text)}
@@ -84,7 +95,7 @@ main{padding:16px; max-width:640px; margin:0 auto; padding-bottom:120px}
 .rec{display:grid; grid-template-columns:1fr 1fr; gap:8px}
 .rec.three{grid-template-columns:1fr 1fr 1fr}
 .rec button{
-  min-height:52px; border-radius:14px; font-size:17px; font-weight:700; cursor:pointer;
+  min-height:52px; border-radius:18px; font-size:17px; font-weight:700; cursor:pointer;
   font-family:inherit; border:2px solid transparent;
 }
 .rec .yes{color:var(--yes); background:var(--yes-bg)}
@@ -96,7 +107,7 @@ main{padding:16px; max-width:640px; margin:0 auto; padding-bottom:120px}
   position:fixed; left:0; right:0; bottom:0; padding:12px 16px calc(12px + env(safe-area-inset-bottom));
   background:linear-gradient(to top, var(--bg) 70%, transparent);
 }
-.add-bar .btn{max-width:608px; margin:0 auto; min-height:60px; font-size:20px; box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.add-bar .btn{max-width:608px; margin:0 auto; min-height:60px; font-size:20px; border-radius:999px; box-shadow:0 6px 18px var(--shadow)}
 label{display:block; font-weight:700; margin:18px 0 6px}
 label small{font-weight:400; color:var(--sub); font-size:15px}
 .search .hint{margin-top:10px}
