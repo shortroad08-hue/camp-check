@@ -60,6 +60,8 @@ header h1{font-family:var(--head); font-weight:400; font-size:30px; margin:0; fl
   border-radius:999px; min-height:48px; padding:0 18px; cursor:pointer; font-family:inherit;
 }
 h2,h3,.card-top button.name{font-family:var(--head); font-weight:400}
+.sound{font-size:16px; padding:0 14px; white-space:nowrap}
+.sound[aria-pressed="false"]{opacity:.7}
 main{padding:16px; max-width:640px; margin:0 auto; padding-bottom:120px}
 .card{
   background:var(--card); border:0; border-radius:var(--r);
@@ -159,6 +161,7 @@ h3{font-size:21px; margin:0 0 8px}
 <header>
   <button class="back" id="back" hidden>← 뒤로</button>
   <h1 id="title">캠핑 예약 확인</h1>
+  <button class="back sound" id="soundBtn" aria-pressed="true">소리 켬</button>
 </header>
 <main id="app"></main>
 <div class="add-bar" id="addBar" hidden><a class="btn main" href="#/new">+ 캠핑장 추가</a></div>
@@ -512,6 +515,63 @@ h3{font-size:21px; margin:0 0 8px}
     var o = e.target.closest('[data-open]');
     if(o){ location.hash = '#/camp/' + o.dataset.open; }
   });
+
+  // ---------- 계곡 물소리 (버튼 누를 때) ----------
+  var SOUNDKEY = 'my-app-sound';
+  var soundOn = true;
+  try{ soundOn = localStorage.getItem(SOUNDKEY) !== 'off'; }catch(e){}
+  var soundBtn = document.getElementById('soundBtn');
+  function showSound(){
+    soundBtn.textContent = soundOn ? '소리 켬' : '소리 끔';
+    soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+  }
+  showSound();
+  var actx = null;
+  function brook(){
+    if(!soundOn) return;
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+      actx = actx || new AC();
+      if(actx.state === 'suspended') actx.resume();
+      var t = actx.currentTime, dur = 0.8, sr = actx.sampleRate, n = Math.floor(sr * dur);
+      // 졸졸 흐르는 물: 부드러운 잡음을 물소리 높이로 거르고, 흔들리게 한다
+      var buf = actx.createBuffer(1, n, sr), d = buf.getChannelData(0), last = 0;
+      for(var i = 0; i < n; i++){ var w = Math.random() * 2 - 1; last = (last + 0.04 * w) / 1.04; d[i] = last * 4; }
+      var src = actx.createBufferSource(); src.buffer = buf;
+      var bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.2; bp.frequency.setValueAtTime(900, t);
+      for(var k = 1; k < 10; k++) bp.frequency.setValueAtTime(600 + Math.random() * 1400, t + k * dur / 10);
+      var g = actx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.35, t + 0.06);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(bp); bp.connect(g); g.connect(actx.destination);
+      src.start(t); src.stop(t + dur);
+      // 퐁퐁 물방울 두세 개
+      var drops = 2 + Math.floor(Math.random() * 2);
+      for(var j = 0; j < drops; j++){
+        var st = t + 0.05 + Math.random() * 0.45, f = 500 + Math.random() * 500;
+        var o = actx.createOscillator(), og = actx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(f, st);
+        o.frequency.exponentialRampToValueAtTime(f * 2.6, st + 0.06);
+        og.gain.setValueAtTime(0.0001, st);
+        og.gain.exponentialRampToValueAtTime(0.12, st + 0.008);
+        og.gain.exponentialRampToValueAtTime(0.0001, st + 0.09);
+        o.connect(og); og.connect(actx.destination);
+        o.start(st); o.stop(st + 0.1);
+      }
+    }catch(e){}
+  }
+  soundBtn.onclick = function(){
+    soundOn = !soundOn;
+    try{ localStorage.setItem(SOUNDKEY, soundOn ? 'on' : 'off'); }catch(e){}
+    showSound();
+    if(soundOn) brook();
+  };
+  document.addEventListener('pointerdown', function(e){
+    var b = e.target.closest('button, .btn, .chips button');
+    if(b && b !== soundBtn) brook();
+  }, {passive:true});
 
   backBtn.onclick = function(){
     if(history.length > 1) history.back(); else location.hash = '#/';
